@@ -3,7 +3,7 @@ import mysql.connector
 from mysql.connector import Error
 
 # Set the OpenAI API key and client
-openai.api_key = ""
+openai.api_key = "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"
 
 # MySQL DB configuration
 db_config = {
@@ -13,6 +13,11 @@ db_config = {
     "password": "wandb",
     "database": "wandb_qa",
 }
+
+conversation_history = [
+       {"role": "system", "content": "You are a chatbot that interacts with the Movies database, which contains information about movies, actors, directors, and genres."},
+       {"role": "user", "content": "Get the top 5 highest-grossing movies."},
+   ]
 
 def connect_to_db(db_config):
     try:
@@ -32,9 +37,9 @@ def execute_query(query, connection):
 def generate_gpt_response(prompt):
     try:
         response = openai.Completion.create(
-            engine="GPT-3.5-turbo",
+            engine="text-davinci-003",
             prompt=prompt,
-            max_tokens=50,
+            max_tokens=150,
             n=1,
             stop=None,
             temperature=0.5,
@@ -46,15 +51,32 @@ def generate_gpt_response(prompt):
 
 def process_user_input(user_input, connection):
     # Generate an SQL query using GPT
-    prompt = f"Translate the following text to an SQL query: '{user_input}'"
+    # prompt = f"Create a SQL script for the wandb_qa Database that correctly utilizes the context given about the relation between the tables in order to asnwer this request: '{user_input}'"
+
+
+    context = (
+        "You are a chatbot whose main purpose is to extract data from a Database "
+        "Database has the following tables: users, organizations, organization_subscriptions, organization_members, runs, teams, entities, and plans. "
+        "users has the following columns and type: created_at(date), updated_at(date), id(int), email(string), auth_id(string), name(string), username(string), photo_url(string), admin(bool), stripe_customer_id(string) . "
+        "organizations has the following columns and type: id(int), name(string), created_at(date), updated_at(date), org_type(string). "
+        "organization_subscriptions has the following columns and type: id(int), organization_id(int), plan_id(int), privileges(string), stripe_subscription_id(string), seats(int), subscription_type(string), status(string). "
+        "organization_members has the following columns and type: user_id(int), organization_id(int), role(string), is_billing_user(bool). "
+        "teams has the following columns and type: user_id(int), enity_id(int), type(string) "
+        "plans has the following columns and type: id(int), name(string), stripe_plan_id(string), plan_type(string). "
+        "Translate the following text to an SQL query "
+    )
+    prompt = f"{context} User asks: {user_input}"
     sql_query = generate_gpt_response(prompt)
 
     # You may need to validate the generated SQL query before executing it on the database
+    print(" Generated SQL Script: ")
     print(sql_query)
     if sql_query:
         # Execute the SQL query and get the results
         results = execute_query(sql_query, connection)
 
+        print(" Results from the Query/DB:")
+        print(results)
         # Prepare the response to display the results
         prompt = f"Prepare a response for the following query result: '{results}'"
         response_text = generate_gpt_response(prompt)
