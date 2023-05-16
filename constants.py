@@ -2,7 +2,6 @@ DB_SHCEMA = """
 TABLE `organizations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL,
-  `stripe_subscription_id` varchar(64) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT NULL,
   `org_type` varchar(64) NOT NULL DEFAULT 'ORGANIZATION',
@@ -117,9 +116,6 @@ TABLE `runs` (
   `stopped` tinyint(1) DEFAULT '0',
   `keys_info` json DEFAULT NULL,
   `agent_id` varchar(128) DEFAULT NULL,
-  `original_entity_name` varchar(64) DEFAULT NULL,
-  `original_project_name` varchar(128) DEFAULT NULL,
-  `original_run_name` varchar(128) DEFAULT NULL,
   `tags_json` json DEFAULT NULL,
   `display_name` mediumtext,
   `notes` mediumtext,
