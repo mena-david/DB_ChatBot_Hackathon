@@ -3,7 +3,6 @@ import pinecone
 import mysql.connector
 from mysql.connector import Error
 import constants
-import json
 from flask import Flask, request, jsonify
 import yaml
 
@@ -107,7 +106,7 @@ def process_user_input(user_input, connection):
 
     context = (
         "You are a chatbot whose main purpose is to extract data from a Database using SQL queries. Here are some facts to keep in mind. "
-        "The Database ONLY has the following tables: users, organizations, organization_subscriptions, organization_members, plan, runs, entities, and projects. "
+        "The Database ONLY has the following tables: users, organizations, organization_subscriptions, organization_members, plans, runs, entities, projects, alerts and alerts_subscriptions. "
     )
 
     schemas = "Here are the necessary database schema definitions for the different tables and all the available columns. Only refer to columns that exist on the schemas on the SQL query.\n"
@@ -115,7 +114,6 @@ def process_user_input(user_input, connection):
 
     for match in res['matches']:
         #print(f"{match['score']:.2f}: {match['metadata']['text']}")
-        #print(str(match['metadata']['text']))
         context += str(match['metadata']['text'])
 
     prompt = f"{schemas}\nThe request is as follows: {user_input}\n Only output a SQL Query:\n"
@@ -125,7 +123,7 @@ def process_user_input(user_input, connection):
     sql_query = generate_gpt_response(prompt, context)
 
     # You may need to validate the generated SQL query before executing it on the database
-    print(sql_query)
+    print(sql_query + "\n")
     if sql_query:
         # Execute the SQL query and get the results
         results = execute_query(sql_query, connection)
@@ -133,7 +131,7 @@ def process_user_input(user_input, connection):
         if not results:
             return "Sorry there was an error in executing the generated SQL query. Try rephrasing your question or indicating specific columns to refrence."
 
-        print("      Results from the Query/DB: " + str(results))
+        print("Results from the Query/DB: " + str(results))
         # Prepare the response to display the results
         prompt = f"Based on this request by the user:'{user_input}' we ran this Database query '{sql_query}' which gave us the following results '{results}'. Format the results to be readable for the user"
         response_text = generate_gpt_response(prompt, "You are a helpful assistant")
