@@ -18,12 +18,13 @@ def sql():
     else:
         return jsonify({'Error': 'User input is required.'}), 400
 
-    response = process_user_input(message, connection)
+    sql_prompt = generate_sql_prompt(message)
+    sql_query = generate_gpt_response(sql_prompt)
+    sql_results = execute_query(sql_query, connection)
 
-    text_prompt = f"Query Used \n'{response[1]}'\n \n Result '{response[0]}'"
-    response = Response(text_prompt, mimetype='text/event-stream')
+    text_prompt = f"Prepare a detailed response with the query '{sql_query}' human readable result '{sql_results}'"
+    response = Response(stream_gpt_response(text_prompt), mimetype='text/event-stream')
 
-    print(text_prompt)
     # Close the database connection
     connection.close()
     return response
