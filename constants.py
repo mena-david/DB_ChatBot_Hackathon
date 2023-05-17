@@ -163,4 +163,76 @@ TABLE `alerts` (
   CONSTRAINT `alerts_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
   CONSTRAINT `alerts_ibfk_3` FOREIGN KEY (`view_id`) REFERENCES `views` (`id`)
 )
+
+TABLE `entities` (
+  `created_at` datetime NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(64) DEFAULT NULL,
+  `default_access` varchar(64) NOT NULL DEFAULT 'USER_READ',
+  `is_team` tinyint(1) DEFAULT NULL,
+  `organization_id` int(11) DEFAULT NULL,
+  `is_paid` tinyint(1) NOT NULL DEFAULT '0',
+  `rate_limits` json DEFAULT NULL,
+  `settings` json DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ix_entities_name` (`name`),
+  KEY `subscription_id` (`subscription_id`),
+  KEY `entities_ibfk_2` (`claiming_entity_id`),
+  KEY `entities_ibfk_3` (`organization_id`),
+  KEY `entities_bucket_stores_fk` (`bucket_store_id`),
+  CONSTRAINT `entities_bucket_stores_fk` FOREIGN KEY (`bucket_store_id`) REFERENCES `bucket_stores` (`id`),
+  CONSTRAINT `entities_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`),
+  CONSTRAINT `entities_ibfk_2` FOREIGN KEY (`claiming_entity_id`) REFERENCES `entities` (`id`),
+  CONSTRAINT `entities_ibfk_3` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`)
+)
+
+TABLE `projects` (
+  `created_at` datetime NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `entity_id` int(11) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `name` varchar(128) DEFAULT NULL,
+  `access` varchar(64) DEFAULT NULL,
+  `views` json DEFAULT NULL,
+  `description` text,
+  `group_path` varchar(256) DEFAULT NULL,
+  `featured` int(11) DEFAULT NULL,
+  `storage_key` varchar(128) NOT NULL,
+  `is_published` tinyint(1) NOT NULL DEFAULT '0',
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ix_projects_name_entity_id` (`name`,`entity_id`),
+  KEY `user_id` (`user_id`),
+  KEY `benchmark_id` (`benchmark_id`),
+  KEY `ix_projects_entity_storage_key` (`entity_id`,`storage_key`),
+  KEY `deleted_at` (`deleted_at`),
+  CONSTRAINT `projects_ibfk_1` FOREIGN KEY (`entity_id`) REFERENCES `entities` (`id`),
+  CONSTRAINT `projects_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `projects_ibfk_3` FOREIGN KEY (`benchmark_id`) REFERENCES `projects` (`id`)
+)
 """
+
+contex_items = [
+    "In order to determine what users belong to what organizations you need to look at the organization_members table.",
+    "Only users have an associated stripe_customer_id and if they are the billing user for an oganization that stripe_customer_id also belongs to that organization.",
+    "To connect an organization to stripe_customer_id, we get the stripe_cutomer_id from the admin user for that organization",
+    "Organizations can have multiple subscriptions.",
+    "Each subscription of type Stripe has a stripe_subscription_id.",
+    "stripe_subscription_ids are ONLY found on the organization_subscriptions table.",
+    "Type of subscription is found on the organization_subscription table under the subscription_type column.",
+    "admin users have a value of 1 on the admin column on the users table.",
+    "Enterprise users are those part of an organization who has a subscription with plan.name Enterprise.",
+    "runs table has job_id column NOT id column.",
+    "The status of an organization, active or disabled, is determined by the status of the primary subscription associated with that organization.",
+    "To connect runs to an organization, from the runs table we match the project_id column to the id column on the projects table where we match the entity_id column to the id column on entities table which has an organization_id column"
+]
+
+conversation_examples = {
+    "examples": [
+        {"user": "Give me everything on user XXX", "sql": "SELECT name, id FROM users WHERE name=XXX"},
+        {"user": "Is Spencer Pearson a admin user?", "sql": "SELECT * FROM users WHERE name = 'Spencer Pearson' AND admin = 1"},
+        {"user": "How many runs has Firstname Lastname run", "sql": "SELECT COUNT(*) FROM runs WHERE user_id = (SELECT id FROM users WHERE name = 'Firstname Lastname');"},
+        {"user": "Get all me unique users that logged runs in the past 2 weeks?", "sql": "SELECT DISTINCT u.username FROM users u INNER JOIN runs r ON u.id = r.user_id WHERE r.created_at > DATE_SUB(NOW(), INTERVAL 2 WEEK);"},
+    ]
+}
