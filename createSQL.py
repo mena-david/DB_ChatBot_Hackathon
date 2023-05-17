@@ -7,12 +7,10 @@ import json
 from flask import Flask, request, jsonify
 import yaml
 
-
 def read_yaml_config(config_file):
     with open(config_file, "r") as file:
         config = yaml.safe_load(file)
     return config
-
 
 config_file = "config.yml"
 config = read_yaml_config(config_file)
@@ -102,7 +100,6 @@ def generate_gpt_response(prompt):
         print(f"Error in generate_gpt_response: {e}")
         return "I'm sorry, but I couldn't complete your request. Please try again later."
 
-
 def process_user_input(user_input, connection):
     xq = openai.Embedding.create(input=user_input, engine=MODEL)['data'][0]['embedding']
     res = index.query([xq], top_k=3, include_metadata=True)
@@ -117,6 +114,7 @@ def process_user_input(user_input, connection):
         "stripe_subscription_ids are ONLY found on the organization_subscriptions table"
         "admin users have a value of 1 on the admin column on the users table"
         "Type of subscription is found on the organization_subscription table under the subscription_type column"
+        "runs table has job_id column NOT id column"
         "Here is the necessary schema definitions for the different tables."
     )
 
@@ -148,7 +146,7 @@ def process_user_input(user_input, connection):
         print(" Results from the Query/DB:")
         print(results)
         # Prepare the response to display the results
-        prompt = f"Prepare a response for the following query result: '{results}'"
+        prompt = f"Based on this request by the user:'{user_input}' and this result from our Database after running the appropiate query '{results}'. Format the response to be readable for the user"
         response_text = generate_gpt_response(prompt)
     else:
         # If no SQL query was generated, ask GPT for a response
@@ -156,7 +154,7 @@ def process_user_input(user_input, connection):
 
     return response_text
 
-def main():
+def main_for_local_dev():
     # Connect to the database
     connection = connect_to_db(db_config)
     if not connection:
@@ -177,7 +175,6 @@ def main():
     # Close the database connection
     connection.close()
 
-
 @app.route('/api/chat', methods=['POST'])
 def chat():
     connection = connect_to_db(db_config)
@@ -194,8 +191,8 @@ def chat():
     # Close the database connection
     connection.close()
 
-    return jsonify({'response': response_text})
-
+    return jsonify({'response': response_text[0] + "  " + response_text[1] })
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    #app.run(debug=True)
+    main_for_local_dev()
