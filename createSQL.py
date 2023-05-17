@@ -5,16 +5,27 @@ from mysql.connector import Error
 import constants
 import json
 from flask import Flask, request, jsonify
+import yaml
+
+
+def read_yaml_config(config_file):
+    with open(config_file, "r") as file:
+        config = yaml.safe_load(file)
+    return config
+
+
+config_file = "config.yml"
+config = read_yaml_config(config_file)
 
 app = Flask(__name__)
 
 # Set the OpenAI API key and client
-openai.organization = "org-WnF2wEqNkV1Nj65CzDxr6iUm"
-openai.api_key = "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"
+openai.organization = config["api"]["openai-org"]
+openai.api_key = config["api"]["openai"]
 openai.Engine.list()
 
 pinecone.init(
-    api_key="335fca0a-6ac5-4e2c-8b33-d8fb28e296f9",
+    api_key=config["api"]["pinecone"],
     environment="us-central1-gcp"  # find next to API key in console
 )
 
