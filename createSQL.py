@@ -95,4 +95,4 @@ def main_for_local_dev():
     connection.close()
 
 if __name__ == '__main__':
-    main()
+    main_for_local_dev()
