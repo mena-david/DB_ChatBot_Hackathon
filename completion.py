@@ -37,7 +37,7 @@ def generate_gpt_response(prompt, context):
             stop=stop,
             temperature=temperature,
         )
-        print(response)
+        # print(response)
         return response.choices[0].message.content.strip()
     except Exception as e:
         print(f"Error in generate_gpt_response: {e}")

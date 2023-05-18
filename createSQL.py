@@ -61,7 +61,7 @@ def process_user_input(user_input, connection, stream=False):
         if not results:
             return "Sorry there was an error in executing the generated SQL query. Try rephrasing your question or indicating specific columns to refrence."
         print("Results from the Query/DB: " + str(results))
-        print(results)
+        # print(results)
         # Prepare the response to display the results
         display_prompt = f"Prepare a human response with the query '{sql_query}' and result '{results}'"
         # display_prompt = f"Based on this request by the user:'{user_input}' we ran this Database query '{sql_query}' which gave us the following results '{results}'. Provide detailed human response"
