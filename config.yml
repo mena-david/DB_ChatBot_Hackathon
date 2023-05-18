@@ -1,9 +1,13 @@
 database:
-     host: localhost
-     port: 3306
-     user: username
-     password: password
-     name: mydb
+  host: localhost
+  port: 3307
+  user: fake
+  password: fake
+  database: fake
 
-   api:
-     key: your_api_key
+api:
+  openai: fake
+  openai-org: fake
+  pinecone: fake
+  pinecone-name: db-chatbot-personal
+  embedding-model: text-embedding-ada-002

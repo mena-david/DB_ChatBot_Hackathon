@@ -1,14 +1,13 @@
 import mysql.connector
+import openai
+import pinecone
 from mysql.connector import Error
+import constants
+import createSQL
+
 
 def connect_to_db():
-    db_config = {
-        "host": "localhost",
-        "port": 3307,
-        "user": "wandb",
-        "password": "wandb",
-        "database": "wandb_qa",
-    }
+    db_config = createSQL.db_config
 
     try:
         connection = mysql.connector.connect(**db_config)
@@ -28,3 +27,27 @@ def execute_query(query, connection):
     else:
         result = cursor.fetchall()
     return result
+
+def setUpIndex(pinecone_name):
+    # Context Set up
+    contex_items = constants.contex_items
+    index = pinecone.Index(pinecone_name)
+
+    batch_num = 0
+    batches = []
+    for i in range(0, len(contex_items)):
+        batch_text = contex_items[i]
+
+        res = openai.Embedding.create(
+            input=batch_text, engine="text-embedding-ada-002"
+        )
+
+        embedding = res.data[0].embedding
+        id = 'batch' + '_' + str(batch_num)
+        meta = {'text': batch_text}
+
+        batches.append((id, embedding, meta))
+        batch_num += 1
+
+    index.upsert(vectors=batches)
+    return index
