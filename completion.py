@@ -19,9 +19,8 @@ def stream_gpt_response(prompt, context):
             stream=True
         )
         for line in response:
-            # print(line)
-            if 'message' in line['choices'][0]:
-                yield line['choices'][0]['message']['content']
+            if 'delta' in line['choices'][0] and 'content' in line['choices'][0]['delta']:
+                yield line['choices'][0]['delta']['content']
     except Exception as e:
         print(f"Error in stream_gpt_response: {e}")
         return "I'm sorry, but I couldn't complete your request. Please try again later."

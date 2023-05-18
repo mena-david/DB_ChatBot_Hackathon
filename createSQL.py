@@ -67,8 +67,8 @@ def process_user_input(user_input, connection, stream=False):
         # display_prompt = f"Based on this request by the user:'{user_input}' we ran this Database query '{sql_query}' which gave us the following results '{results}'. Provide detailed human response"
         if stream:
             return stream_gpt_response(display_prompt, "You are a helpful assistant")
-        else:
-            return generate_gpt_response(display_prompt, "You are a helpful assistant")
+        
+        return generate_gpt_response(display_prompt, "You are a helpful assistant")
 
     # If no SQL query was generated, ask GPT for a response
     return generate_gpt_response(user_input, "You are a helpful assistant")
