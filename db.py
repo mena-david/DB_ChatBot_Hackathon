@@ -1,15 +1,13 @@
 import mysql.connector
+import openai
+import pinecone
 from mysql.connector import Error
 import constants
+import createSQL
+
 
 def connect_to_db():
-    db_config = {
-        "host": "localhost",
-        "port": 3307,
-        "user": "wandb",
-        "password": "wandb",
-        "database": "wandb_qa",
-    }
+    db_config = createSQL.db_config
 
     try:
         connection = mysql.connector.connect(**db_config)
