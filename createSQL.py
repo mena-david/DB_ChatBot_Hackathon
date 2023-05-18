@@ -93,6 +93,3 @@ def main_for_local_dev():
 
     # Close the database connection
     connection.close()
-
-if __name__ == '__main__':
-    main_for_local_dev()
