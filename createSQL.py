@@ -1,8 +1,7 @@
 import openai
 import pinecone
-import mysql.connector
-from mysql.connector import Error
 import constants
+from db import *
 from flask import Flask, request, jsonify
 import yaml
 
@@ -53,36 +52,8 @@ def setUpIndex():
 
     return index
 
-index = setUpIndex() #only needs to be done once
-#index = pinecone.Index('db-chatbot-personal')
-
-def connect_to_db():
-    db_config = {
-        "host": "localhost",
-        "port": 3307,
-        "user": "wandb",
-        "password": "wandb",
-        "database": "wandb_qa",
-    }
-
-    try:
-        connection = mysql.connector.connect(**db_config)
-        if connection.is_connected():
-            return connection
-    except Error as e:
-        print("Error while connecting to MySQL", e)
-        return None
-
-def execute_query(query, connection):
-    cursor = connection.cursor()
-    result = ""
-    try:
-        cursor.execute(query)
-    except Exception as e:
-        print(e)
-    else:
-        result = cursor.fetchall()
-    return result
+#index = setUpIndex() #only needs to be done once
+index = pinecone.Index('db-chatbot-personal')
 
 def generate_gpt_response(prompt, context):
     try:
@@ -90,7 +61,7 @@ def generate_gpt_response(prompt, context):
             model="gpt-3.5-turbo",
             messages=[{"role": "system", "content": context},
                       {"role": "user", "content": prompt}],
-            max_tokens=160,
+            max_tokens=170,
             n=1,
             stop=None,
             temperature=0.5,
@@ -102,7 +73,7 @@ def generate_gpt_response(prompt, context):
 
 def process_user_input(user_input, connection):
     xq = openai.Embedding.create(input=user_input, engine=MODEL)['data'][0]['embedding']
-    res = index.query([xq], top_k=10, include_metadata=True)
+    res = index.query([xq], top_k=9, include_metadata=True)
 
     context = (
         "You are a chatbot whose main purpose is to extract data from a Database using SQL queries. Here are some facts to keep in mind. "
@@ -139,7 +110,7 @@ def process_user_input(user_input, connection):
         # If no SQL query was generated, ask GPT for a response
         response_text = generate_gpt_response(user_input, "You are a helpful assistant")
 
-    return response_text
+    return [response_text, sql_query]
 
 def main_for_local_dev():
     # Connect to the database
@@ -153,7 +124,7 @@ def main_for_local_dev():
             # Get user input
             user_input = input("User: ")
             # Handle user input
-            response_text = process_user_input(user_input, connection)
+            [response_text, query] = process_user_input(user_input, connection)
             print(f"Chatbot: {response_text}")
         except Exception as e:
             print("Error: ", e)
@@ -162,24 +133,24 @@ def main_for_local_dev():
     # Close the database connection
     connection.close()
 
-@app.route('/api/chat', methods=['POST'])
-def chat():
-    connection = connect_to_db()
-    if not connection:
-        print("Cannot connect to the database")
-        return
-
-    user_input = request.json.get('user_input', '')
-    if not user_input:
-        return jsonify({'error': 'User input is required.'}), 400
-
-    response_text = process_user_input(user_input)
-
-    # Close the database connection
-    connection.close()
-
-    return jsonify({'response': response_text[0] + "  " + response_text[1] })
-
-if __name__ == '__main__':
-    #app.run(debug=True)
-    main_for_local_dev()
+# @app.route('/api/chat', methods=['POST'])
+# def chat():
+#     connection = connect_to_db()
+#     if not connection:
+#         print("Cannot connect to the database")
+#         return
+#
+#     user_input = request.json.get('user_input', '')
+#     if not user_input:
+#         return jsonify({'error': 'User input is required.'}), 400
+#
+#     response_text = process_user_input(user_input)
+#
+#     # Close the database connection
+#     connection.close()
+#
+#     return jsonify({'response': response_text[0] + "  " + response_text[1] })
+#
+# if __name__ == '__main__':
+#     #app.run(debug=True)
+#     main_for_local_dev()
