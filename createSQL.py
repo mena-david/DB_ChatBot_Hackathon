@@ -75,7 +75,7 @@ def process_user_input(user_input, connection, stream=False):
 
 def main_for_local_dev():
     # Connect to the database
-    connection = connect_to_db(db_config)
+    connection = connect_to_db()
     if not connection:
         print("Cannot connect to the database")
         return
