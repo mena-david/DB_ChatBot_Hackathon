@@ -1,3 +1,6 @@
+from createSQL import *
+from db import *
+from mysql.connector import Error
 from flask import Flask, Response, request, jsonify
 from flask_cors import CORS
 from createSQL import *
@@ -18,12 +21,7 @@ def sql():
     else:
         return jsonify({'Error': 'User input is required.'}), 400
 
-    sql_prompt = generate_sql_prompt(message)
-    sql_query = generate_gpt_response(sql_prompt)
-    sql_results = execute_query(sql_query, connection)
-
-    text_prompt = f"Prepare a detailed response with the query '{sql_query}' human readable result '{sql_results}'"
-    response = Response(stream_gpt_response(text_prompt), mimetype='text/event-stream')
+    response = Response(process_user_input(user_input=message, connection=connection, stream=True), mimetype='text/event-stream')
 
     # Close the database connection
     connection.close()

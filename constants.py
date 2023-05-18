@@ -1,4 +1,4 @@
-DB_SHCEMA = """
+DB_SCHEMA = """
 TABLE `organizations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL,
