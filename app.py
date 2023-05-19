@@ -26,7 +26,7 @@ def sql():
 
 # flask run
 if __name__ == '__main__':
-    #app.run(debug=True)
-    main_for_local_dev()
+    app.run(debug=True)
+    #main_for_local_dev()
 
 CORS(app)

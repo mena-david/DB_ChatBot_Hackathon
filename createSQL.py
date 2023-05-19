@@ -21,7 +21,6 @@ openai.Engine.list()
 
 pinecone.init(
     api_key=config["api"]["pinecone"],
-    # environment="us-central1-gcp"
     environment="asia-northeast1-gcp"  # find next to API key in console
 )
 pinecone_name = config["api"]["pinecone-name"]
@@ -39,7 +38,7 @@ def process_user_input(user_input, connection, stream=False):
     # Enrich context for generating the sql statement
     context = (
         "You are a chatbot whose main purpose is to extract data from a Database using SQL queries. Here are some facts to keep in mind. "
-        "The Database ONLY has the following tables: users, organizations, organization_subscriptions, organization_members, plans, runs, entities, projects, alerts and alerts_subscriptions. "
+        "The Database ONLY has the following tables: users, organizations, organization_subscriptions, organization_members, plans, runs, entities, projects, sweeps, and teams. "
     )
     xq = openai.Embedding.create(input=user_input, engine=embedding_model)['data'][0]['embedding']
     res = index.query([xq], top_k=10, include_metadata=True) # similarities
@@ -61,7 +60,7 @@ def process_user_input(user_input, connection, stream=False):
         [succeed, results] = execute_query(sql_query, connection)
         if not succeed:
             print("Sorry there was an error in executing the generated SQL query. Will attempt to fix and retry.")
-            check_sql_validity_prompt = f"Here is a database schema definition that includes all table names and columns. {schemas}.\nI ran this SQL query {sql_query}, and got this error: {results}\n Please review the query for correctness. I am using MySQL as my database system, and I want to ensure that the query succeeds. Additionally, please check for any syntax errors or potential performance issues and cross reference the schema to make sure all columns referenced actually exist on the table. Please provide the corrected query without any additional explanation or text."
+            check_sql_validity_prompt = f"Here is a database schema definition that includes all table names and columns. {schemas}.\nI ran this SQL query {sql_query}, and got this error: {results}\n Please review the query for correctness. I am using MySQL as my database system, and I want to ensure that the query succeeds. Additionally, please check for any syntax errors or potential performance issues and check the provided schema to make sure all columns referenced actually exist on the table. There is no column runs.id. Please provide the corrected query without any additional explanation or text."
             sql_query = generate_gpt_response(check_sql_validity_prompt, "You an expert on SQL scrips and queries. You correct badly formed queries. Please provide the corrected query without any additional explanation or text.")
 
             i = sql_query.find("SELECT")
