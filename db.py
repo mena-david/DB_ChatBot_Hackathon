@@ -19,14 +19,14 @@ def connect_to_db():
 
 def execute_query(query, connection):
     cursor = connection.cursor()
-    result = ""
     try:
         cursor.execute(query)
     except Exception as e:
         print(e)
+        return [False, e]
     else:
         result = cursor.fetchall()
-    return result
+    return [True, result]
 
 def setUpIndex(pinecone_name):
     # Context Set up

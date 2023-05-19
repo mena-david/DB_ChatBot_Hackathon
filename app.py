@@ -1,6 +1,3 @@
-from createSQL import *
-from db import *
-from mysql.connector import Error
 from flask import Flask, Response, request, jsonify
 from flask_cors import CORS
 from createSQL import *
@@ -29,8 +26,7 @@ def sql():
 
 # flask run
 if __name__ == '__main__':
-    print('is this app running?')
-    app.run(debug=True)
-    #main_for_local_dev()
+    #app.run(debug=True)
+    main_for_local_dev()
 
 CORS(app)
