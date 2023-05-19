@@ -161,7 +161,8 @@ contex_items = [
     "Type of subscription is found on the organization_subscription table under the subscription_type column. The types are 'enterprise', 'stripe', 'manual_trial', 'user_led_trial', 'academic_trial', 'academic', 'local'. ",
     "admin users have a value of 1 on the admin column on the users table. ",
     "then entities tables holds users and teams. If a team is part of an organization, the organization_id will included the organization_id that team is a part of"
-    "team name is found on the entities table under the name column for all entities where is_team = 1. teams.name Does NOT exist"
+    "team name is found on the entities table under the name column for all entities where is_team = 1. teams.name Does NOT exist. "
+    "sweeps table. "
     "the teams table groups users by entity_id. The name of the team is the value on the name column on the entities table for that entity_id. ",
     "a starter customer is an organization who has a subscription with a plan_id of 15, 16, 17, 18, 19, or 20 which corresponds to plan.name of 'starter_tier_1_monthly', 'starter_tier_1_yearly', 'starter_tier_2_monthly', 'starter_tier_2_yearly', 'starter_tier_3_monthly' or 'starter_tier_3_yearly'"
     "Enterprise users are those part of an organization who has a subscription with subscription_type = 'enterprise' and subscription_status = enabled. ",
