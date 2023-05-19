@@ -71,11 +71,11 @@ def process_user_input(user_input, connection, stream=False):
             print("\nNew SQL query:\n" + sql_query + "\n")
             [succeed, results] = execute_query(sql_query, connection)
             if not succeed:
-                return "Sorry there was an error in executing the generated SQL query again. Try rephrasing your question or indicating specific columns to refrence."
+                return "Sorry there was an error in executing the generated SQL query again. Try rephrasing your question or indicating specific columns to reference."
 
         print("Results from the Query/DB: " + str(results))
         # Prepare the response to display the results
-        #display_prompt = f"Prepare a human response with the query '{sql_query}' and result '{results}'"
+        # display_prompt = f"Prepare a response with query '{sql_query}' and result '{results}' with new line and prompts. Provide short human response"
         display_prompt = f"Based on this request by the user:'{user_input}' we ran this Database query '{sql_query}' which gave us the following results '{results}'. Provide a human readable response"
         if stream:
             return stream_gpt_response(display_prompt, "You are a helpful assistant")
