@@ -74,8 +74,10 @@ def process_user_input(user_input, connection, stream=False):
 
         print("Results from the Query/DB: " + str(results))
         # Prepare the response to display the results
+        display_prompt = f"Based on this request by the user:'{user_input}' we ran db query '{sql_query}' and resulted in '{results}'. Format human readable reponse and include sql query separately"
+
         # display_prompt = f"Prepare a response with query '{sql_query}' and result '{results}' with new line and prompts. Provide short human response"
-        display_prompt = f"Based on this request by the user:'{user_input}' we ran this Database query '{sql_query}' which gave us the following results '{results}'. Provide a human readable response"
+        # display_prompt = f"Based on this request by the user:'{user_input}' we ran this Database query '{sql_query}' which gave us the following results '{results}'. Provide a human readable response"
         if stream:
             return stream_gpt_response(display_prompt, "You are a helpful assistant")
         
